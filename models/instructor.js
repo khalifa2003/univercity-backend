@@ -3,17 +3,15 @@ const mongoose = require("mongoose");
 const Instructor = new mongoose.Schema(
   {
     instructor_id: { type: Number, required: true, unique: true },
-    name: { type: String, required: true },
-    email: { type: String, required: true },
-    phone_number: { type: String },
+
     hire_date: { type: Date },
     salary: { type: Number },
-    department: { type: String },
+    department: { type: mongoose.Schema.Types.ObjectId, ref: "Department" },
 
     // Determine the role of the lecturer => Doctor - Assistant
-    role: {
+    role_in_college: {
       type: String,
-      enum: ["Assistant", "Doctor"],
+      enum: ["Doctor", "Assistant"],
       required: true,
     },
 
@@ -44,8 +42,7 @@ const Instructor = new mongoose.Schema(
   },
   {
     timestamps: true,
-    // to enable virtual populate
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
   }
 );
+
+module.exports = mongoose.model("Instructor", Instructor);

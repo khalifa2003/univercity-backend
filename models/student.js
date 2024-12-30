@@ -2,19 +2,15 @@ const mongoose = require("mongoose");
 
 const Student = new mongoose.Schema(
   {
-    student_id: { type: String, required: true, unique: true },
-    arabic_name: { type: String, required: true, unique: true },
-    english_name: { type: String, required: true, unique: true },
-    country: { type: String, required: true, unique: true },
-    gender: { type: String, enum: ["Male", "Female"], required: true },
-    religion: { type: String, required: true },
-    birth_date: { type: Date, required: true },
-    birth_place: { type: String, required: true },
-    national_id: { type: String, required: true, unique: true },
-    image: { type: String },
+    user_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    department: { type: mongoose.Schema.Types.ObjectId, ref: "Department" },
 
     // Family information
-    familyInfo: {
+    family_info: {
       father_name: { type: String },
       job: { type: String },
       town: { type: String },
@@ -25,41 +21,21 @@ const Student = new mongoose.Schema(
       fax: { type: String },
     },
 
-    // Contact information
-    contact_info: {
-      town: { type: String },
-      address: { type: String },
-      home_phone: { type: String },
-      self_phone: { type: String },
-      email: { type: String },
-      fax: { type: String },
-    },
-
-    // Previous qualification data
-    previous_education: {
-      school_name: { type: String },
-      qualification: { type: String },
-      graduation_year: { type: String },
-      total_grade: { type: Number },
-      ratio: { type: Number },
-      seat_number: { type: Number, unique: true },
-    },
-
     // Recording subjects and grades for each semester
     enrollments: [
       {
         term: { type: Number, required: true },
         courses: [
           {
-            course_code: { type: Number, required: true, unique },
-            course_name: { type: String, required: true },
+            course_code: { type: mongoose.Schema.ObjectId, ref: "Course" },
             instructor_id: {
               type: mongoose.Schema.ObjectId,
               ref: "Instructor",
             },
-            attendance: {
-              present: [{ date: Date, status: { type: Number, enum: [0, 1] } }],
-            },
+            attendance: [
+              { date: Date, status: { type: Number, enum: [0, 1] } },
+            ],
+
             grades: {
               midterm: { type: Number, default: 0 },
               year_work: { type: Number, default: 0 },
@@ -87,15 +63,6 @@ const Student = new mongoose.Schema(
       },
     ],
 
-    // Exam schedule
-    exam_schedule: [
-      {
-        course_id: { type: mongoose.Schema.ObjectId, ref: "Course" },
-        date: { type: Date },
-        location: { type: String },
-      },
-    ],
-
     // Student Warnings
     warnings: [
       {
@@ -104,31 +71,27 @@ const Student = new mongoose.Schema(
       },
     ],
 
-    // Military training
-    military_training: {
-      status: {
-        type: String,
-        enum: ["Completed", "Pending"],
-        default: "Pending",
+    // Fees
+    fees: [
+      {
+        term: { type: Number },
+        amount: { type: Number },
+        status: { type: String, enum: ["Paid", "Pending"], default: "Pending" },
+        payment_date: { type: Date },
       },
-      result: { type: String },
-    },
-
-    // Student card
-    student_card: {
-      card_number: { type: String },
-      issue_date: { type: Date },
-      expiry_date: { type: Date },
-    },
-
-    created_at: { type: Date, default: Date.now },
+    ],
   },
   {
     timestamps: true,
-    // to enable virtual populate
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
   }
 );
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    return next();
+  }
 
-module.exports = mongoose.model("Student", studentSchema);
+  this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
+
+module.exports = mongoose.model("Student", Student);

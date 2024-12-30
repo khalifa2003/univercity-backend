@@ -4,11 +4,14 @@ const Course = new mongoose.Schema(
   {
     course_code: { type: String, required: true, unique: true },
     course_name: { type: String, required: true, unique: true },
-    course_description: { type: String },
+    department: { type: mongoose.Schema.Types.ObjectId, ref: "Department" },
+
     credits_hours: { type: String, required: true },
-    instructor_id: { type: mongoose.Schema.ObjectId, ref: "Instructor" },
+    instructors: [{ type: mongoose.Schema.Types.ObjectId, ref: "Instructor" }],
     faculty_id: { type: String },
-    prerequisites: [String],
+
+    prerequisites: [{ type: mongoose.Schema.ObjectId, ref: "Course" }],
+
     term: { type: Number, required: true },
     schedule: {
       day: { type: String },
@@ -18,10 +21,7 @@ const Course = new mongoose.Schema(
   },
   {
     timestamps: true,
-    // to enable virtual populate
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
   }
 );
 
-module.exports = mongoose.model("Course", courseSchema);
+module.exports = mongoose.model("Course", Course);
