@@ -53,7 +53,7 @@ exports.createStudent = async (req, res) => {
   res.status(201).json({ success: true, data: user, token });
 };
 
-// get students
+// get all students 
 exports.getAllStudents = async (req, res) => {
   try {
     const students = await Student.find()
